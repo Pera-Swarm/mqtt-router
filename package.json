@@ -1,0 +1,34 @@
+{
+  "name": "@pera-swarm/mqtt-router",
+  "version": "1.0.0",
+  "description": "An easy-to-use and flexible routing library for MQTT.",
+  "main": "index.js",
+  "directories": {
+    "dist": "dist",
+    "lib": "lib",
+    "test": "test"
+  },
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Pera-Swarm/mqtt-router.git"
+  },
+  "keywords": [
+    "Pera",
+    "Pera-Swarm",
+    "MQTT",
+    "Router",
+    "MQTTRouter",
+    "MQTT",
+    "Router"
+  ],
+  "author": "Pera-Swarm",
+  "license": "LGPL-2.1",
+  "bugs": {
+    "url": "https://github.com/Pera-Swarm/mqtt-router/issues"
+  },
+  "homepage": "https://github.com/Pera-Swarm/mqtt-router#readme",
+  "publishConfig": {
+    "access": "public"
+  }
+}
