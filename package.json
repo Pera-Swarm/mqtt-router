@@ -5,8 +5,8 @@
   "main": "index.js",
   "files": [
     "lib",
-    "dist",
-    "test"
+    "test",
+    "index.js"
   ],
   "directories": {
     "dist": "dist",
