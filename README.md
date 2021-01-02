@@ -148,6 +148,9 @@ const SAMPLE_ROUTES = [
 module.exports = SAMPLE_ROUTES;
 ```
 
+> Note: You can also configure a topic prefix by configuring an environment variable *`MQTT_CHANNEL`*. (example: `MQTT_CHANNEL=beta` in a .env file locally)
+
+
 ### Contribute
 
 #### 1. Install dependencies
