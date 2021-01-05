@@ -1,5 +1,5 @@
 import { IClientSubscribeOptions, IPacket, IPublishPacket, MqttClient } from 'mqtt';
-const { channel, logLevel } = require('./config');
+import { channel, logLevel } from './config';
 
 
 /**
