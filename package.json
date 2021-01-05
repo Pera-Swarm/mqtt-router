@@ -4,7 +4,7 @@
   "description": "An easy-to-use and flexible routing library for MQTT.",
   "main": "index.js",
   "files": [
-    "lib",
+    "dist",
     "index.js"
   ],
   "directories": {
