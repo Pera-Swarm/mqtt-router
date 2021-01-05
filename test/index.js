@@ -1,26 +1,37 @@
+const { MQTTRouter } = require('../index');
 const mqttClient = require('mqtt');
 const mqttConfig = require('./mqtt.config');
-const mqtt = mqttClient.connect(mqttConfig.HOST, mqttConfig.options);
-
-const { MQTTRouter } = require('../');
+const mqtt = mqttClient.connect(mqttConfig.HOST, mqttConfig.mqttOptions);
 
 var router;
 
 // Sample dynamic route list with handler functions
 const SAMPLE_ROUTES = [
     {
-        topic: 'v1/sample',
+        topic: 'sample',
         allowRetained: true,
         subscribe: true,
-        handler: (mqtt, topic, msg) => {
-            data = JSON.parse(msg);
-            console.log('Sample subscription picked up the topic', data);
+        publish: false,
+        type: 'String',
+        handler: (msg) => {
+            try {
+                var data = JSON.parse(msg);
+                console.log(
+                    `Default Subscriber(${SAMPLE_ROUTES[0].topic}) picked up the message`,
+                    data
+                );
+            } catch (err) {
+                console.log('Handler error:', err);
+            }
+        },
+        fallbackRetainHandler: () => {
+            console.log('Fallback method');
         }
     }
 ];
 
 // Sample MQTT Options
-const SAMPLE_OPTIONS = { qos: 2, rap: true, rh: true };
+const SAMPLE_OPTIONS = { qos: 2, rap: false, rh: true };
 
 // Sample setup function that runs on connect
 const SAMPLE_SETUP_FN = () => {

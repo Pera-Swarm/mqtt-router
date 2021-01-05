@@ -164,14 +164,19 @@ $ npm install
 
 #### 2. Testing
 
-> Note: Before running the test cases, you should configure environment variables `MQTT_HOST`,`MQTT_USER`, `MQTT_PASS`, and `MQTT_CLIENT`.
+> Note: Before running the test cases, you should configure environment variables `MQTT_HOST`,`MQTT_USER`, `MQTT_PASS`, and `MQTT_CLIENT`. Please refer `sample.nodemon.json` file for nodemon envvironment variable configuration.
 Manually run the test cases.
 ```
 $ node test/index.js
 ```
 
+or you can use nodemon script once environment variables configured correctly.
+
+```
+$ npm run client
+```
+
 ### To-Do
-- [ ] Separate allowedRetained functions for both allowed and not allowed use cases.
 - [ ] Add flexible subscribers and publishers (Should be able to unsubscribe from routes later on).
 
 ### Licence

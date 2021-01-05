@@ -8,10 +8,12 @@
     "index.js"
   ],
   "directories": {
-    "dist": "dist"
+    "dist": "dist",
+    "test": "test"
   },
   "scripts": {
     "build": "tsc",
+    "client": "nodemon test\\index.js",
     "dev": "tsc --watch",
     "format": "prettier --write \"**/*.+(ts|js|json|yml|yaml|md)\""
   },
