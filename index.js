@@ -1,10 +1,9 @@
-const MQTTRouter = require('./lib/router');
-const { publishToTopic, subscribeToTopic } = require('./lib/topic');
-const { wrapper } = require('./lib/helper');
+/*!
+ * pera-swarm@mqtt-router
+ * Copyright(c) 2021 Pera-Swarm [luk3Sky, NuwanJ]
+ * LGPL-2.1 Licensed
+ */
 
-module.exports = {
-    MQTTRouter,
-    publishToTopic,
-    subscribeToTopic,
-    wrapper
-};
+'use strict';
+
+module.exports = require('./dist');
