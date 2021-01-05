@@ -5,29 +5,28 @@
   "main": "index.js",
   "files": [
     "lib",
-    "test",
     "index.js"
   ],
   "directories": {
-    "dist": "dist",
-    "lib": "lib",
-    "test": "test"
+    "dist": "dist"
   },
   "scripts": {
-    "format": "prettier --write \"**/*.+(js|json|yml|yaml|md)\""
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "format": "prettier --write \"**/*.+(ts|js|json|yml|yaml|md)\""
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Pera-Swarm/mqtt-router.git"
   },
   "keywords": [
-    "Pera",
-    "Pera-Swarm",
     "MQTT",
     "Router",
     "MQTTRouter",
-    "MQTT",
-    "Router"
+    "MQTT-Router",
+    "MQTT Router",
+    "Pera",
+    "Pera-Swarm"
   ],
   "author": "Pera-Swarm",
   "license": "LGPL-2.1",
@@ -40,9 +39,12 @@
   },
   "dependencies": {},
   "devDependencies": {
+    "@types/mqtt": "^2.5.0",
+    "@types/node": "^14.14.20",
     "dotenv": "^8.2.0",
     "nodemon": "^2.0.6",
-    "prettier": "^2.2.0"
+    "prettier": "^2.2.0",
+    "typescript": "^4.1.3"
   },
   "peerDependencies": {
     "mqtt": "^4.x"
