@@ -27,6 +27,23 @@ const SAMPLE_ROUTES = [
         fallbackRetainHandler: () => {
             console.log('Fallback method');
         }
+    },
+    {
+        topic: 'sample-2',
+        allowRetained: true,
+        subscribe: true,
+        publish: false,
+        type: 'String',
+        handler: (msg) => {
+            try {
+                console.log(`Sample subscriber handler picked up the message`, msg);
+            } catch (err) {
+                console.log('Handler error:', err);
+            }
+        },
+        fallbackRetainHandler: () => {
+            console.log('Fallback method');
+        }
     }
 ];
 
