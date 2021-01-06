@@ -163,7 +163,7 @@ export class MQTTRouter {
                             this._routes[i].fallbackRetainHandler === undefined
                         ) {
                             // Discard Older/Retained messages
-                            this.callFallback(topic, msg, this._routes[i]);
+                            this.discard(topic, msg);
                         }
                     } catch (err) {
                         this.errorHandler(err);
