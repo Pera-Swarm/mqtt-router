@@ -2,7 +2,6 @@ import { IClientSubscribeOptions, IPacket, IPublishPacket, MqttClient } from 'mq
 import { channel, logLevel } from './config';
 import { Queue } from './queue';
 
-
 /**
  * constraints:
  * all fresh messages will be picked up by handler
