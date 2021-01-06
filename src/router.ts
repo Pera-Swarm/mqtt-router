@@ -190,6 +190,7 @@ export class MQTTRouter {
             }
         }
         console.log('');
+        this._publishQueue.begin();
     };
 
     /**

@@ -23,6 +23,7 @@ interface AbstractQueue {
     _mqttClient: MqttClient;
     _mqttOptions: IClientSubscribeOptions;
     _list: Message[];
+    _schedulerInterval: number;
     add: Function;
     remove: Function;
     publish: Function;
@@ -32,6 +33,7 @@ export class Queue implements AbstractQueue {
     _mqttClient: MqttClient;
     _mqttOptions: IClientSubscribeOptions;
     _list: Message[];
+    _schedulerInterval: number;
 
     constructor(
         mqttClient: MqttClient,
@@ -41,10 +43,7 @@ export class Queue implements AbstractQueue {
         this._list = [];
         this._mqttClient = mqttClient;
         this._mqttOptions = options;
-        cron.schedule(secondsInterval(interval), this.routineCheck, {
-            scheduled: true,
-            timezone: 'Asia/Colombo'
-        });
+        this._schedulerInterval = interval;
     }
 
     /**
@@ -54,7 +53,7 @@ export class Queue implements AbstractQueue {
      */
     add = (topic: string, data: string | Buffer): void => {
         this._list.push(new Message(topic, data));
-        if(logLevel!=='info'){
+        if (logLevel !== 'info') {
             console.log('Added_To_Queue', this._list);
         }
     };
@@ -71,7 +70,7 @@ export class Queue implements AbstractQueue {
             prevList.forEach((item, index) => {
                 if (item.topic === topic) {
                     this._list.splice(index, 1);
-                    if(logLevel!=='info'){
+                    if (logLevel !== 'info') {
                         console.log('Removed_Message_With_Topic >', topic);
                     }
                 }
@@ -90,12 +89,12 @@ export class Queue implements AbstractQueue {
                 return item;
             }
         });
-        if(logLevel!=='info'){
+        if (logLevel !== 'info') {
             console.log('Found_MQTT_Messages', messages);
         }
         if (messages.length !== 0) {
             const message = messages[0] === undefined ? -1 : messages[0];
-            if(logLevel!=='info'){
+            if (logLevel !== 'info') {
                 console.log('Return_MQTT_Message >', message);
             }
             return message;
@@ -105,11 +104,21 @@ export class Queue implements AbstractQueue {
     };
 
     /**
+     * method for starting queue processing
+     */
+    begin = () => {
+        cron.schedule(secondsInterval(this._schedulerInterval), this.routineCheck, {
+            scheduled: true,
+            timezone: 'Asia/Colombo'
+        });
+    };
+
+    /**
      * method for publishing a message in the queue
      * @param {Message} message message to be published
      */
     publish = (message: Message) => {
-        if(logLevel!=='info'){
+        if (logLevel !== 'info') {
             console.log('MQTT_Publish', message, channel);
         }
         this._mqttClient.publish(
@@ -123,12 +132,12 @@ export class Queue implements AbstractQueue {
      * method for periodically checking the message queue to be published
      */
     routineCheck = () => {
-        if(logLevel!=='info'){
-            console.log('MQTT_Publish_Queue_Check');                
+        if (logLevel !== 'info') {
+            console.log('MQTT_Publish_Queue_Check');
         }
         if (this._list.length !== 0) {
-            if(logLevel!=='info'){
-                console.log('MQTT_Publish_Queue_Not_Empty');                
+            if (logLevel !== 'info') {
+                console.log('MQTT_Publish_Queue_Not_Empty');
             }
             for (let i = 0; i < this._list.length; i++) {
                 const element: Message | undefined = this._list.pop();
