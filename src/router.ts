@@ -1,5 +1,6 @@
 import { IClientSubscribeOptions, IPacket, IPublishPacket, MqttClient } from 'mqtt';
 import { channel, logLevel } from './config';
+import { Queue } from './queue';
 
 
 /**
@@ -59,6 +60,7 @@ const defaultOnError = function (error: any) {
 export class MQTTRouter {
     protected _mqttClient: MqttClient;
     protected _routes: Route[];
+    protected _publishQueue: Queue;
     private _options: IClientSubscribeOptions;
     private setup: Function;
     private errorHandler: Function;
@@ -103,6 +105,7 @@ export class MQTTRouter {
                 }
             ];
         }
+        this._publishQueue = new Queue(mqttConnection, options);
         this._options = options;
         this.setup = setup;
         this.errorHandler = onError;
@@ -231,5 +234,14 @@ export class MQTTRouter {
         ) {
             console.log('MQTT_Msg_Discarded: ', topic, '>', message);
         }
+    };
+
+    /**
+     * method for adding the message to the publish queue
+     * @param {string} topic message topic
+     * @param {string|Buffer} data message data
+     */
+    pushToPublishQueue = (topic: string, data: string | Buffer) => {
+        this._publishQueue.add(topic, data);
     };
 }

@@ -53,3 +53,34 @@ router = new MQTTRouter(
 );
 
 router.start();
+
+const samplePublishMessages = [
+    {
+        topic: 'sample',
+        data: 'Sample Data 1'
+    },
+    {
+        topic: 'sample',
+        data: 'Sample Data 2'
+    },
+    {
+        topic: 'sample',
+        data: 'Sample Data 3'
+    },
+    {
+        topic: 'sample',
+        data: 'Sample Data 4'
+    },
+    {
+        topic: 'sample',
+        data: 'Sample Data 5'
+    },
+    {
+        topic: 'sample',
+        data: 'Sample Data 6'
+    }
+];
+
+samplePublishMessages.forEach((element) => {
+    router.pushToPublishQueue(element.topic, element.data);
+});
