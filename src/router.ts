@@ -38,7 +38,7 @@ export type Route = {
     /**
      * only for retained messages, but for route specific custom logic
      * subscribe handler function, called when subscribe:true, packet.retain:true and allowRetained:false
-     * is specified fallbackRetainHandler function will be called
+     * if specified fallbackRetainHandler function will be called
      * if not specified, retained messages will be discarded
      */
     fallbackRetainHandler?: Function;
