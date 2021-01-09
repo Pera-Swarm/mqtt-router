@@ -38,7 +38,7 @@ export type Route = {
     /**
      * only for retained messages, but for route specific custom logic
      * subscribe handler function, called when subscribe:true, packet.retain:true and allowRetained:false
-     * is specified fallbackRetainHandler function will be called
+     * if specified fallbackRetainHandler function will be called
      * if not specified, retained messages will be discarded
      */
     fallbackRetainHandler?: Function;
@@ -116,8 +116,9 @@ export class MQTTRouter {
     start = () => {
         this._mqttClient.on('connect', () => {
             console.log('MQTT_Connecting...\n');
-            this.handleRouteSubscriptions();
             this.setup();
+            this.handleRouteSubscriptions();
+            this._publishQueue.begin();
         });
 
         this._mqttClient.on('error', (err) => {
@@ -194,7 +195,6 @@ export class MQTTRouter {
             }
         }
         console.log('');
-        this._publishQueue.begin();
     };
 
     /**
