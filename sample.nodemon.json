@@ -1,0 +1,10 @@
+{
+    "env": {
+        "MQTT_HOST": "mqtt://localhost",
+        "MQTT_USER": "user",
+        "MQTT_PASS": "password",
+        "MQTT_CLIENT": "clientId",
+        "MQTT_CHANNEL": "v1/",
+        "LOG_LEVEL": "info"
+    }
+}

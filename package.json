@@ -1,6 +1,6 @@
 {
   "name": "@pera-swarm/mqtt-router",
-  "version": "1.1.4",
+  "version": "1.2.0",
   "description": "An easy-to-use and flexible routing library for MQTT.",
   "main": "index.js",
   "files": [
@@ -8,10 +8,12 @@
     "index.js"
   ],
   "directories": {
-    "dist": "dist"
+    "dist": "dist",
+    "test": "test"
   },
   "scripts": {
     "build": "tsc",
+    "client": "nodemon test\\index.js",
     "dev": "tsc --watch",
     "format": "prettier --write \"**/*.+(ts|js|json|yml|yaml|md)\""
   },
@@ -37,10 +39,13 @@
   "publishConfig": {
     "access": "public"
   },
-  "dependencies": {},
+  "dependencies": {
+    "node-cron": "^2.0.3"
+  },
   "devDependencies": {
     "@types/mqtt": "^2.5.0",
     "@types/node": "^14.14.20",
+    "@types/node-cron": "^2.0.3",
     "dotenv": "^8.2.0",
     "nodemon": "^2.0.6",
     "prettier": "^2.2.0",

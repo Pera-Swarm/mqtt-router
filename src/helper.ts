@@ -17,3 +17,19 @@ export const wrapper = (routes: Route[], property: any) => {
 
     return wrappedRoutes;
 };
+
+/**
+ * Generates a cron interval called in given seconds
+ * @param {number} frequency in seconds
+ */
+export const secondsInterval = (freq: number) => {
+    return '*/' + freq + ' * * * * *';
+};
+
+/**
+ * Generates a cron interval called in given minutes
+ * @param {number} frequency in minutes
+ */
+export const minutesInterval = (freq: number) => {
+    return '*/' + freq + ' * * * *';
+};

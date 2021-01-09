@@ -1,6 +1,6 @@
 import { IClientSubscribeOptions, IPacket, IPublishPacket, MqttClient } from 'mqtt';
 import { channel, logLevel } from './config';
-
+import { Queue } from './queue';
 
 /**
  * constraints:
@@ -59,6 +59,7 @@ const defaultOnError = function (error: any) {
 export class MQTTRouter {
     protected _mqttClient: MqttClient;
     protected _routes: Route[];
+    protected _publishQueue: Queue;
     private _options: IClientSubscribeOptions;
     private setup: Function;
     private errorHandler: Function;
@@ -103,6 +104,7 @@ export class MQTTRouter {
                 }
             ];
         }
+        this._publishQueue = new Queue(mqttConnection, options);
         this._options = options;
         this.setup = setup;
         this.errorHandler = onError;
@@ -133,7 +135,12 @@ export class MQTTRouter {
                             this._routes[i].type == 'String'
                                 ? message.toString()
                                 : message.toJSON().data;
-
+                        if (logLevel !== 'info') {
+                            console.log(
+                                'MQTT_Message_To_Be_Handled:',
+                                topic + ' > ' + msg
+                            );
+                        }
                         if (!packet.retain) {
                             // Fresh messages
                             this.callHandler(topic, msg, this._routes[i]);
@@ -155,7 +162,7 @@ export class MQTTRouter {
                             this._routes[i].fallbackRetainHandler === undefined
                         ) {
                             // Discard Older/Retained messages
-                            this.callFallback(topic, msg, this._routes[i]);
+                            this.discard(topic, msg);
                         }
                     } catch (err) {
                         this.errorHandler(err);
@@ -170,7 +177,7 @@ export class MQTTRouter {
      */
     handleRouteSubscriptions = () => {
         for (var i = 0; i < this._routes.length; i++) {
-            if (this._routes[i].subscribe != false) {
+            if (this._routes[i].subscribe !== false) {
                 // subscribe at the beginning unless it is avoided by setting 'subscribe:false'
                 if (logLevel === 'debug') {
                     console.log('MQTT_Subscribed: ', channel + this._routes[i].topic);
@@ -187,6 +194,7 @@ export class MQTTRouter {
             }
         }
         console.log('');
+        this._publishQueue.begin();
     };
 
     /**
@@ -230,6 +238,64 @@ export class MQTTRouter {
             logLevel === 'error'
         ) {
             console.log('MQTT_Msg_Discarded: ', topic, '>', message);
+        }
+    };
+
+    /**
+     * method for adding the message to the publish queue
+     * @param {string} topic message topic
+     * @param {string|Buffer} data message data
+     */
+    pushToPublishQueue = (topic: string, data: string | Buffer) => {
+        this._publishQueue.add(topic, String(data));
+    };
+
+    /**
+     * method for adding a route to the list
+     * @param {Route} route route object to be added to the subscriber list
+     */
+    addRoute = (route: Route) => {
+        if (route === undefined) {
+            throw new TypeError('Invalid route');
+        } else {
+            this._routes.push(route);
+            if (route.subscribe !== false) {
+                // subscribe at the beginning unless it is avoided by setting 'subscribe:false'
+                if (logLevel === 'debug') {
+                    console.log('MQTT_Subscribed: ', channel + route.topic);
+                }
+                this._mqttClient.subscribe(channel + route.topic, this._options);
+            } else {
+                // No subscription required for this topic
+                if (logLevel === 'debug') {
+                    console.log('MQTT_Not_Subscribed: ', channel + route.topic);
+                }
+            }
+        }
+    };
+
+    /**
+     * method for removing a route in the list by a given topic
+     * @param {string} topic route topic
+     */
+    removeRoute = (topic: string) => {
+        if (topic === undefined) {
+            throw new TypeError('Invalid topic');
+        } else {
+            const prevList = this._routes;
+            prevList.forEach((item, index) => {
+                if (item.topic === topic) {
+                    this._routes.splice(index, 1);
+                    if (logLevel !== 'info') {
+                        console.log('Removed_Route_With_Topic >', topic);
+                    }
+                    this._mqttClient.unsubscribe(channel + topic, this._options, () => {
+                        if (logLevel !== 'info') {
+                            console.log('Unsubscribed_Route_With_Topic >', topic);
+                        }
+                    });
+                }
+            });
         }
     };
 }
