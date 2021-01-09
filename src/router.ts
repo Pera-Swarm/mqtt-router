@@ -116,8 +116,9 @@ export class MQTTRouter {
     start = () => {
         this._mqttClient.on('connect', () => {
             console.log('MQTT_Connecting...\n');
-            this.handleRouteSubscriptions();
             this.setup();
+            this.handleRouteSubscriptions();
+            this._publishQueue.begin();
         });
 
         this._mqttClient.on('error', (err) => {
@@ -194,7 +195,6 @@ export class MQTTRouter {
             }
         }
         console.log('');
-        this._publishQueue.begin();
     };
 
     /**

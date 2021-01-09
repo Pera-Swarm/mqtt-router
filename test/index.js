@@ -12,7 +12,7 @@ const SAMPLE_ROUTES = [
         allowRetained: true,
         subscribe: true,
         publish: false,
-        type: 'String',
+        type: 'JSON',
         handler: (msg) => {
             try {
                 var data = JSON.parse(msg);
@@ -73,27 +73,27 @@ router.start();
 
 const samplePublishMessages = [
     {
-        topic: 'sample',
+        topic: 'sample-2',
         data: 'Sample Data 1'
     },
     {
-        topic: 'sample',
+        topic: 'sample-2',
         data: 'Sample Data 2'
     },
     {
-        topic: 'sample',
+        topic: 'sample-2',
         data: 'Sample Data 3'
     },
     {
-        topic: 'sample',
+        topic: 'sample-2',
         data: 'Sample Data 4'
     },
     {
-        topic: 'sample',
+        topic: 'sample-2',
         data: 'Sample Data 5'
     },
     {
-        topic: 'sample',
+        topic: 'sample-2',
         data: 'Sample Data 6'
     }
 ];
