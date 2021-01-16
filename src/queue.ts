@@ -64,7 +64,7 @@ export class Queue implements AbstractQueue {
      */
     remove = (topic: string) => {
         if (typeof topic !== 'string') {
-            throw new TypeError('Invalid topic');
+            console.error('Invalid topic');
         } else {
             const prevList = this._list;
             prevList.forEach((item, index) => {

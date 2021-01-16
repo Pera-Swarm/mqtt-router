@@ -28,7 +28,8 @@ export const resolveChannelTopic = (topic: string) => {
     const mergedTopic = channel + topic;
     var result: string;
     if (typeof topic !== 'string') {
-        throw new TypeError('Invalid topic');
+        console.error('Invalid topic');
+        return channel;
     } else {
         const mergedFC = channel + topic[0];
         if (channel.includes('/') && topic[0].includes('/')) {
