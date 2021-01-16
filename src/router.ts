@@ -1,5 +1,6 @@
 import { IClientSubscribeOptions, IPacket, IPublishPacket, MqttClient } from 'mqtt';
 import { channel, logLevel } from './config';
+import { resolveChannelTopic } from './helper';
 import { Queue } from './queue';
 
 /**
@@ -53,7 +54,7 @@ const defaultSetup = function () {};
  * @param {any} error error object
  */
 const defaultOnError = function (error: any) {
-    throw new Error(`MQTT_Router Error: ${error}`);
+    console.error(`MQTT_Router_Error: ${error}`);
 };
 
 export class MQTTRouter {
@@ -119,6 +120,7 @@ export class MQTTRouter {
             this.setup();
             this.handleRouteSubscriptions();
             this._publishQueue.begin();
+            console.log(`MQTT_Router: Connected to channel [${channel}]\n`);
         });
 
         this._mqttClient.on('error', (err) => {
@@ -126,51 +128,64 @@ export class MQTTRouter {
             this.errorHandler(err);
         });
 
-        this._mqttClient.on('message', (topic, message, packet: IPublishPacket) => {
-            // Check JSON format
-            for (var i = 0; i < this._routes.length; i += 1) {
-                if (channel + this._routes[i].topic === topic) {
-                    var msg;
-                    try {
-                        msg =
-                            this._routes[i].type == 'String'
-                                ? message.toString()
-                                : message.toJSON().data;
+        this._mqttClient.on(
+            'message',
+            (topic: string, message: Buffer, packet: IPublishPacket) => {
+                for (var i = 0; i < this._routes.length; i += 1) {
+                    if (resolveChannelTopic(this._routes[i].topic) === topic) {
+                        // convert message format
+                        var msg;
                         if (logLevel !== 'info') {
                             console.log(
                                 'MQTT_Message_To_Be_Handled:',
-                                topic + ' > ' + msg
+                                topic + ' > ' + message
                             );
                         }
-                        if (!packet.retain) {
-                            // Fresh messages
-                            this.callHandler(topic, msg, this._routes[i]);
-                        } else if (packet.retain && this._routes[i].allowRetained) {
-                            // Older/Retained messages
-                            // Note: Accept and handle 'retained true logic' only if both the packet is retained and the route allows retained packets
-                            this.callHandler(topic, msg, this._routes[i]);
-                        } else if (
-                            packet.retain &&
-                            !this._routes[i].allowRetained &&
-                            this._routes[i].fallbackRetainHandler !== undefined
-                        ) {
-                            // Older/Retained messages
-                            // Note: Accept and handle 'retained false logic' if both the packet is retained and the route doesn't allow retained packets
-                            this.callFallback(topic, msg, this._routes[i]);
-                        } else if (
-                            packet.retain &&
-                            !this._routes[i].allowRetained &&
-                            this._routes[i].fallbackRetainHandler === undefined
-                        ) {
-                            // Discard Older/Retained messages
-                            this.discard(topic, msg);
+                        try {
+                            msg =
+                                this._routes[i].type == 'String'
+                                    ? message.toString()
+                                    : JSON.parse(message.toString());
+                            /*msg = message.toString();
+
+                            if(this._routes[i].type != 'String'){
+                            console.log('translating to JSON');
+                            msg = JSON.parse(msg);
+                        }*/
+                            if (!packet.retain) {
+                                // Fresh messages
+                                this.callHandler(topic, msg, this._routes[i]);
+                            } else if (packet.retain && this._routes[i].allowRetained) {
+                                // Older/Retained messages
+                                // Note: Accept and handle 'retained true logic' only if both the packet is retained and the route allows retained packets
+                                this.callHandler(topic, msg, this._routes[i]);
+                            } else if (
+                                packet.retain &&
+                                !this._routes[i].allowRetained &&
+                                this._routes[i].fallbackRetainHandler !== undefined
+                            ) {
+                                // Older/Retained messages
+                                // Note: Accept and handle 'retained false logic' if both the packet is retained and the route doesn't allow retained packets
+                                this.callFallback(topic, msg, this._routes[i]);
+                            } else if (
+                                packet.retain &&
+                                !this._routes[i].allowRetained &&
+                                this._routes[i].fallbackRetainHandler === undefined
+                            ) {
+                                // Discard Older/Retained messages
+                                this.discard(topic, msg);
+                            }
+                        } catch (err) {
+                            // No need to crash the app for syntax error on JSON, just ignore
+                            console.error(
+                                `JSON Parse error > topic: ${topic}, msg: ${message}`
+                            );
+                            //this.errorHandler(err);
                         }
-                    } catch (err) {
-                        this.errorHandler(err);
                     }
                 }
             }
-        });
+        );
     };
 
     /**
@@ -181,16 +196,22 @@ export class MQTTRouter {
             if (this._routes[i].subscribe !== false) {
                 // subscribe at the beginning unless it is avoided by setting 'subscribe:false'
                 if (logLevel === 'debug') {
-                    console.log('MQTT_Subscribed: ', channel + this._routes[i].topic);
+                    console.log(
+                        'MQTT_Subscribed: ',
+                        resolveChannelTopic(this._routes[i].topic)
+                    );
                 }
                 this._mqttClient.subscribe(
-                    channel + this._routes[i].topic,
+                    resolveChannelTopic(this._routes[i].topic),
                     this._options
                 );
             } else {
                 // No subscription required for this topic
                 if (logLevel === 'debug') {
-                    console.log('MQTT_Not_Subscribed: ', channel + this._routes[i].topic);
+                    console.log(
+                        'MQTT_Not_Subscribed: ',
+                        resolveChannelTopic(this._routes[i].topic)
+                    );
                 }
             }
         }
@@ -220,7 +241,7 @@ export class MQTTRouter {
         if (route.fallbackRetainHandler !== undefined) {
             route.fallbackRetainHandler(message);
             if (logLevel === 'debug') {
-                console.log('MQTT_Msg_Fall backed: ', topic, '>', message);
+                console.log('MQTT_Msg_Fallback: ', topic, '>', message);
             }
         }
     };
@@ -262,13 +283,19 @@ export class MQTTRouter {
             if (route.subscribe !== false) {
                 // subscribe at the beginning unless it is avoided by setting 'subscribe:false'
                 if (logLevel === 'debug') {
-                    console.log('MQTT_Subscribed: ', channel + route.topic);
+                    console.log('MQTT_Subscribed: ', resolveChannelTopic(route.topic));
                 }
-                this._mqttClient.subscribe(channel + route.topic, this._options);
+                this._mqttClient.subscribe(
+                    resolveChannelTopic(route.topic),
+                    this._options
+                );
             } else {
                 // No subscription required for this topic
                 if (logLevel === 'debug') {
-                    console.log('MQTT_Not_Subscribed: ', channel + route.topic);
+                    console.log(
+                        'MQTT_Not_Subscribed: ',
+                        resolveChannelTopic(route.topic)
+                    );
                 }
             }
         }
@@ -289,11 +316,15 @@ export class MQTTRouter {
                     if (logLevel !== 'info') {
                         console.log('Removed_Route_With_Topic >', topic);
                     }
-                    this._mqttClient.unsubscribe(channel + topic, this._options, () => {
-                        if (logLevel !== 'info') {
-                            console.log('Unsubscribed_Route_With_Topic >', topic);
+                    this._mqttClient.unsubscribe(
+                        resolveChannelTopic(topic),
+                        this._options,
+                        () => {
+                            if (logLevel !== 'info') {
+                                console.log('Unsubscribed_Route_With_Topic >', topic);
+                            }
                         }
-                    });
+                    );
                 }
             });
         }
