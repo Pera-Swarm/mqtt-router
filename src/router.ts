@@ -54,7 +54,7 @@ const defaultSetup = function () {};
  * @param {any} error error object
  */
 const defaultOnError = function (error: any) {
-    throw new Error(`MQTT_Router Error: ${error}`);
+    console.error(`MQTT_Router_Error: ${error}`);
 };
 
 export class MQTTRouter {
@@ -141,35 +141,51 @@ export class MQTTRouter {
                                 topic + ' > ' + message
                             );
                         }
-                        if (!packet.retain) {
-                            // Fresh messages
-                            this.callHandler(topic, msg, this._routes[i]);
-                        } else if (packet.retain && this._routes[i].allowRetained) {
-                            // Older/Retained messages
-                            // Note: Accept and handle 'retained true logic' only if both the packet is retained and the route allows retained packets
-                            this.callHandler(topic, msg, this._routes[i]);
-                        } else if (
-                            packet.retain &&
-                            !this._routes[i].allowRetained &&
-                            this._routes[i].fallbackRetainHandler !== undefined
-                        ) {
-                            // Older/Retained messages
-                            // Note: Accept and handle 'retained false logic' if both the packet is retained and the route doesn't allow retained packets
-                            this.callFallback(topic, msg, this._routes[i]);
-                        } else if (
-                            packet.retain &&
-                            !this._routes[i].allowRetained &&
-                            this._routes[i].fallbackRetainHandler === undefined
-                        ) {
-                            // Discard Older/Retained messages
-                            this.discard(topic, msg);
+                        try {
+                            msg =
+                                this._routes[i].type == 'String'
+                                    ? message.toString()
+                                    : JSON.parse(message.toString());
+                            /*msg = message.toString();
+
+                            if(this._routes[i].type != 'String'){
+                            console.log('translating to JSON');
+                            msg = JSON.parse(msg);
+                        }*/
+                            if (!packet.retain) {
+                                // Fresh messages
+                                this.callHandler(topic, msg, this._routes[i]);
+                            } else if (packet.retain && this._routes[i].allowRetained) {
+                                // Older/Retained messages
+                                // Note: Accept and handle 'retained true logic' only if both the packet is retained and the route allows retained packets
+                                this.callHandler(topic, msg, this._routes[i]);
+                            } else if (
+                                packet.retain &&
+                                !this._routes[i].allowRetained &&
+                                this._routes[i].fallbackRetainHandler !== undefined
+                            ) {
+                                // Older/Retained messages
+                                // Note: Accept and handle 'retained false logic' if both the packet is retained and the route doesn't allow retained packets
+                                this.callFallback(topic, msg, this._routes[i]);
+                            } else if (
+                                packet.retain &&
+                                !this._routes[i].allowRetained &&
+                                this._routes[i].fallbackRetainHandler === undefined
+                            ) {
+                                // Discard Older/Retained messages
+                                this.discard(topic, msg);
+                            }
+                        } catch (err) {
+                            // No need to crash the app for syntax error on JSON, just ignore
+                            console.error(
+                                `JSON Parse error > topic: ${topic}, msg: ${message}`
+                            );
+                            //this.errorHandler(err);
                         }
-                    } catch (err) {
-                        this.errorHandler(err);
                     }
                 }
             }
-        });
+        );
     };
 
     /**
@@ -180,16 +196,22 @@ export class MQTTRouter {
             if (this._routes[i].subscribe !== false) {
                 // subscribe at the beginning unless it is avoided by setting 'subscribe:false'
                 if (logLevel === 'debug') {
-                    console.log('MQTT_Subscribed: ', channel + this._routes[i].topic);
+                    console.log(
+                        'MQTT_Subscribed: ',
+                        resolveChannelTopic(this._routes[i].topic)
+                    );
                 }
                 this._mqttClient.subscribe(
-                    channel + this._routes[i].topic,
+                    resolveChannelTopic(this._routes[i].topic),
                     this._options
                 );
             } else {
                 // No subscription required for this topic
                 if (logLevel === 'debug') {
-                    console.log('MQTT_Not_Subscribed: ', channel + this._routes[i].topic);
+                    console.log(
+                        'MQTT_Not_Subscribed: ',
+                        resolveChannelTopic(this._routes[i].topic)
+                    );
                 }
             }
         }
@@ -302,7 +324,7 @@ export class MQTTRouter {
                                 console.log('Unsubscribed_Route_With_Topic >', topic);
                             }
                         }
-                    });
+                    );
                 }
             });
         }
