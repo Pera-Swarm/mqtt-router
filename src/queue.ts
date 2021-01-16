@@ -1,7 +1,7 @@
-import { IClientSubscribeOptions, MqttClient } from 'mqtt';
 import cron from 'node-cron';
-import { channel, logLevel } from './config';
-import { secondsInterval } from './helper';
+import { IClientSubscribeOptions, MqttClient } from 'mqtt';
+import { logLevel } from './config';
+import { resolveChannelTopic, secondsInterval } from './helper';
 
 type MessageType = {
     topic: string;
@@ -119,10 +119,15 @@ export class Queue implements AbstractQueue {
      */
     publish = (message: Message) => {
         if (logLevel !== 'info') {
-            console.log('MQTT_Publish', message, channel);
+            console.log(
+                'MQTT_Publish >',
+                message,
+                'to topic:',
+                resolveChannelTopic(message.topic)
+            );
         }
         this._mqttClient.publish(
-            channel + message.topic,
+            resolveChannelTopic(message.topic),
             message.data,
             this._mqttOptions
         );
@@ -140,9 +145,9 @@ export class Queue implements AbstractQueue {
                 console.log('MQTT_Publish_Queue_Not_Empty');
             }
             for (let i = 0; i < this._list.length; i++) {
-                const element: Message | undefined = this._list.pop();
-                if (element !== undefined) {
-                    this.publish(element);
+                const message: Message | undefined = this._list.pop();
+                if (message !== undefined) {
+                    this.publish(message);
                 }
             }
         }

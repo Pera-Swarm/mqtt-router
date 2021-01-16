@@ -1,5 +1,5 @@
 import { IClientSubscribeOptions, MqttClient } from 'mqtt';
-const { channel } = require('./config');
+import { resolveChannelTopic } from './helper';
 
 /**
  * method for subscribing to a given topic with options
@@ -12,7 +12,7 @@ export const subscribeToTopic = (
     topic: string,
     options: IClientSubscribeOptions
 ) => {
-    mqtt.subscribe(channel + topic, options);
+    mqtt.subscribe(resolveChannelTopic(topic), options);
 };
 
 /**
@@ -30,7 +30,7 @@ export const publishToTopic = (
     options: object,
     callback: Function
 ) => {
-    mqtt.publish(channel + topic, message, options, () => {
+    mqtt.publish(resolveChannelTopic(topic), message, options, () => {
         if (callback !== undefined) {
             callback();
         }
