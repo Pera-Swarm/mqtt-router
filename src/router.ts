@@ -143,7 +143,7 @@ export class MQTTRouter {
                         }
                         try {
                             msg =
-                                this._routes[i].type == 'String'
+                                this._routes[i].type === 'String'
                                     ? message.toString()
                                     : JSON.parse(message.toString());
                             /*msg = message.toString();
@@ -277,7 +277,7 @@ export class MQTTRouter {
      */
     addRoute = (route: Route) => {
         if (route === undefined) {
-            throw new TypeError('Invalid route');
+            console.error('Invalid route');
         } else {
             this._routes.push(route);
             if (route.subscribe !== false) {
@@ -307,7 +307,7 @@ export class MQTTRouter {
      */
     removeRoute = (topic: string) => {
         if (topic === undefined) {
-            throw new TypeError('Invalid topic');
+            console.error('Invalid topic');
         } else {
             const prevList = this._routes;
             prevList.forEach((item, index) => {
