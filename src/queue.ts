@@ -101,21 +101,11 @@ export class MQTTQueue implements AbstractQueue {
      */
     publish = (message: Message, options?: mqttConfigOptions) => {
         const topic = resolveChannelTopic(message.topic);
-        
+
         if (logLevel !== 'info') {
-            console.log(
-                'MQTT_Publish >',
-                message,
-                'to topic:',
-                topic,
-                options
-            );
+            console.log('MQTT_Publish >', message, 'to topic:', topic, options);
         }
-        this._mqttClient.publish(
-            topic,
-            message.data,
-            options || {}
-        );
+        this._mqttClient.publish(topic, message.data, options || {});
     };
 
     /**
