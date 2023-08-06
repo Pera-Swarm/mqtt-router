@@ -2,7 +2,7 @@ import { IClientSubscribeOptions, MqttClient } from 'mqtt';
 import { resolveChannelTopic } from './helper';
 
 /**
- * method for subscribing to a given topic with options
+ * Method for subscribing to a given topic with options
  * @param {MqttClient} mqtt mqtt connection
  * @param {string} topic mqtt topic
  * @param {IClientSubscribeOptions} options mqtt message subscription options
@@ -16,11 +16,11 @@ export const subscribeToTopic = (
 };
 
 /**
- * method for publishing a message to a given topic with options and a callback funtion
- * @param {MqttClient} mqtt mqttconnection
- * @param {string} topic mqtt topic
- * @param {string} message mqtt message object
- * @param {object} options mqtt message options
+ * Method for publishing a message to a given topic with options and a callback funtion
+ * @param {MqttClient} mqtt MQTTConnection
+ * @param {string} topic MQTT topic
+ * @param {string} message MQTT message object
+ * @param {object} options MQTT message options
  * @param {Function} callback callback function
  */
 export const publishToTopic = (

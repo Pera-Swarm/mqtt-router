@@ -1,16 +1,12 @@
-import cron from 'node-cron';
 import { IClientSubscribeOptions, MqttClient } from 'mqtt';
-import { logLevel } from './config';
-import { resolveChannelTopic, secondsInterval } from './helper';
-
-type MessageType = {
-    topic: string;
-    data: string | Buffer;
-};
+import Queue from 'queue';
+import { logLevel, mqttConfigOptions } from './config';
+import { resolveChannelTopic } from './helper';
 
 class Message {
     topic: string;
     data: string | Buffer;
+    options?: mqttConfigOptions;
     constructor(topic: string, data: string | Buffer) {
         this.topic = topic;
         this.data = data;
@@ -22,134 +18,120 @@ const defaultOptions: IClientSubscribeOptions = { qos: 2, rap: true, nl: true };
 interface AbstractQueue {
     _mqttClient: MqttClient;
     _mqttOptions: IClientSubscribeOptions;
-    _list: Message[];
+    _queue: Queue;
     _schedulerInterval: number;
     add: Function;
-    remove: Function;
     publish: Function;
+    start: Function;
+    stop: Function;
+    end: Function;
 }
 
-export class Queue implements AbstractQueue {
+export class MQTTQueue implements AbstractQueue {
     _mqttClient: MqttClient;
     _mqttOptions: IClientSubscribeOptions;
-    _list: Message[];
+    _queue: Queue;
     _schedulerInterval: number;
 
     constructor(
         mqttClient: MqttClient,
         options: IClientSubscribeOptions = defaultOptions,
-        interval: number = 2
+        interval: number = 1000
     ) {
-        this._list = [];
         this._mqttClient = mqttClient;
         this._mqttOptions = options;
         this._schedulerInterval = interval;
+        this._queue = new Queue({ results: [] });
+        this._queue.timeout = this._schedulerInterval;
+        this._queue.autostart = true;
+
+        this._queue.addEventListener('success', (result: any) => {
+            if (logLevel !== 'info') {
+                console.log('Queue processed: > ', result);
+            }
+        });
+
+        this._queue.addEventListener('timeout', (e: any) => {
+            if (logLevel !== 'info') {
+                console.log(
+                    'Queue timed out:',
+                    e.detail.job.toString().replace(/\n/g, '')
+                );
+            }
+            e.detail.next();
+        });
     }
 
     /**
-     * method for adding a message to the queue
+     * Method for starting queue processing
+     */
+    start = () => {
+        this._queue.start((error) => {
+            // This callback will be called when the queue processing encounters an error or
+            // finished processing all the workers in the queue
+            if (error !== undefined) {
+                console.error(error);
+            }
+            if (logLevel !== 'info') {
+                console.log('Queue finished processing:', this._queue.results);
+            }
+        });
+    };
+
+    /**
+     * Method for adding a message to the queue
      * @param {string} topic
      * @param {string|Buffer} data message data
      */
-    add = (topic: string, data: string | Buffer): void => {
-        this._list.push(new Message(topic, data));
-        if (logLevel !== 'info') {
-            console.log('Added_To_Queue', this._list);
-        }
-    };
-
-    /**
-     * method for removing a message in the queue by a given topic
-     * @param {string} topic  message topic
-     */
-    remove = (topic: string) => {
-        if (typeof topic !== 'string') {
-            console.error('Invalid topic');
-        } else {
-            const prevList = this._list;
-            prevList.forEach((item, index) => {
-                if (item.topic === topic) {
-                    this._list.splice(index, 1);
-                    if (logLevel !== 'info') {
-                        console.log('Removed_Message_With_Topic >', topic);
-                    }
-                }
-            });
-        }
-    };
-
-    /**
-     * method for finding a message with a given topic in the queue
-     * @param {string} topic topic of the message in the queue
-     * @returns {Message|-1} found message or -1
-     */
-    findByTopic = (topic: string): Message | -1 => {
-        const messages = this._list.map((item) => {
-            if (item.topic === topic) {
-                return item;
-            }
-        });
-        if (logLevel !== 'info') {
-            console.log('Found_MQTT_Messages', messages);
-        }
-        if (messages.length !== 0) {
-            const message = messages[0] === undefined ? -1 : messages[0];
+    add = (topic: string, data: string | Buffer, options?: mqttConfigOptions): void => {
+        this._queue.push((callback) => {
+            this.publish(new Message(topic, data), options);
             if (logLevel !== 'info') {
-                console.log('Return_MQTT_Message >', message);
+                console.log('Added_To_Queue', `{topic: '${topic}', data: '${data}}'`);
             }
-            return message;
-        } else {
-            return -1;
-        }
-    };
-
-    /**
-     * method for starting queue processing
-     */
-    begin = () => {
-        cron.schedule(secondsInterval(this._schedulerInterval), this.routineCheck, {
-            scheduled: true,
-            timezone: 'Asia/Colombo'
+            if (callback !== undefined) {
+                callback(undefined, data);
+            }
         });
     };
 
     /**
-     * method for publishing a message in the queue
+     * Method for publishing a message in the queue
      * @param {Message} message message to be published
      */
-    publish = (message: Message) => {
+    publish = (message: Message, options?: mqttConfigOptions) => {
+        const topic = resolveChannelTopic(message.topic);
+        
         if (logLevel !== 'info') {
             console.log(
                 'MQTT_Publish >',
                 message,
                 'to topic:',
-                resolveChannelTopic(message.topic)
+                topic,
+                options
             );
         }
         this._mqttClient.publish(
-            resolveChannelTopic(message.topic),
+            topic,
             message.data,
-            this._mqttOptions
+            options || {}
         );
     };
 
     /**
-     * method for periodically checking the message queue to be published
+     * Method for stoping queue processing
      */
-    routineCheck = () => {
-        if (logLevel !== 'info') {
-            console.log('MQTT_Publish_Queue_Check');
-        }
-        if (this._list.length !== 0) {
-            if (logLevel !== 'info') {
-                console.log('MQTT_Publish_Queue_Not_Empty');
-            }
-            for (let i = 0; i < this._list.length; i++) {
-                const message: Message | undefined = this._list.pop();
-                if (message !== undefined) {
-                    this.publish(message);
-                }
-            }
-        }
+    stop = () => {
+        this._queue.stop();
+    };
+
+    /**
+     * Method for stoping and emptying the queue immediately
+     * @param {any} error error description
+     * @param {Function} callback callback function
+     */
+    end = (error: any, callback: Function) => {
+        this._queue.end(error);
+        callback();
     };
 }
