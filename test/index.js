@@ -1,8 +1,9 @@
 const { MQTTRouter } = require('../index');
 const mqttClient = require('mqtt');
 const mqttConfig = require('./mqtt.config');
-const mqtt = mqttClient.connect(mqttConfig.HOST, mqttConfig.mqttOptions);
 
+const mqttHost =  mqttConfig.HOST.startsWith("mqtt://") ? mqttConfig.HOST : `mqtt://${mqttConfig.HOST}` ;
+const mqtt = mqttClient.connect(mqttHost, mqttConfig.mqttOptions);
 var router;
 
 // Sample dynamic route list with handler functions

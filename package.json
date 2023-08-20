@@ -15,6 +15,7 @@
     "build": "tsc",
     "client": "nodemon test\\index.js",
     "dev": "tsc --watch",
+    "test": "node test",
     "format": "prettier --write \"**/*.+(ts|js|json|yml|yaml|md)\""
   },
   "repository": {
