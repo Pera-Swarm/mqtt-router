@@ -15,7 +15,6 @@
         "build": "tsc",
         "dev": "tsc --watch",
         "test": "node test",
-        "coverage": "c8 npm run test",
         "format": "prettier --write \"**/*.+(js|jsx|ts|tsx|json|yml|yaml)\""
     },
     "repository": {
@@ -42,7 +41,6 @@
     },
     "dependencies": {},
     "devDependencies": {
-        "c8": "^8.0.1",
         "mocha": "^10.2.0",
         "@types/mqtt": "^2.5.0",
         "@types/node": "^14.14.20",
