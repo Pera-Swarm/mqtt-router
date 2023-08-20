@@ -1,7 +1,7 @@
 import { IClientSubscribeOptions, IPacket, IPublishPacket, MqttClient } from 'mqtt';
 import { channel, logLevel, mqttConfigOptions } from './config';
 import { resolveChannelTopic } from './helper';
-import { MQTTQueue } from './queue';
+import { MQTTQueue } from './mqtt_queue';
 import { v4 as uuidv4 } from 'uuid';
 
 /**
