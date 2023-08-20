@@ -1,4 +1,4 @@
-const MQTTRouter  = require('../index');
+const MQTTRouter = require('../index');
 const mqttClient = require('mqtt');
 const mqttConfig = require('./mqtt.config');
 

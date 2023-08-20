@@ -45,13 +45,13 @@ export class MQTTQueue implements AbstractQueue {
         this._queue.timeout = this._schedulerInterval;
         this._queue.autostart = true;
 
-        this._queue.addEventListener('success', (result: any) => {
+        this._queue.addListener('success', (result: any) => {
             if (logLevel !== 'info') {
                 console.log('Queue processed: > ', result);
             }
         });
 
-        this._queue.addEventListener('timeout', (e: any) => {
+        this._queue.addListener('timeout', (e: any) => {
             if (logLevel !== 'info') {
                 console.log(
                     'Queue timed out:',
