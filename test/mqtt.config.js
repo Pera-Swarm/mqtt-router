@@ -1,8 +1,8 @@
 module.exports = {
     HOST: process.env.MQTT_HOST,
-    port: 1883,
+    port: process.env.MQTT_PORT,
     options: {
-        port: 1883,
+        port: process.env.MQTT_PORT,
         clientId: process.env.MQTT_CLIENT,
         clientId: 'server_' + Math.random().toString(16).substr(2, 8),
         username: process.env.MQTT_USER || '',
