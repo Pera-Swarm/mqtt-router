@@ -48,6 +48,23 @@ const SAMPLE_ROUTES = [
         fallbackRetainHandler: () => {
             console.log('Fallback method');
         }
+    },
+    {
+        topic: 'quite',
+        allowRetained: true,
+        subscribe: true,
+        publish: false,
+        type: 'String',
+        handler: (msg) => {
+            try {
+                process.exit(0);
+            } catch (err) {
+                console.log('Handler error:', err);
+            }
+        },
+        fallbackRetainHandler: () => {
+            console.log('Fallback method');
+        }
     }
 ];
 
@@ -73,8 +90,6 @@ router = new MQTTRouter(
     SAMPLE_ON_ERROR_FN
 );
 
-router.start();
-
 const samplePublishMessages = [
     {
         topic: 'sample-2',
@@ -99,9 +114,18 @@ const samplePublishMessages = [
     {
         topic: 'sample-2',
         data: 'Sample Data 6'
+    },
+    {
+        topic: 'quite',
+        data: 'End the test'
     }
 ];
 
-samplePublishMessages.forEach((element) => {
-    router.pushToPublishQueue(element.topic, element.data);
+router.start((response) => {
+    console.log(response);
+    samplePublishMessages.forEach((element) => {
+        console.log('Publishing', element.topic);
+        console.log(element.data);
+        router.pushToPublishQueue(element.topic, element.data);
+    });
 });

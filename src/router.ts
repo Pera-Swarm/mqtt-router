@@ -140,7 +140,7 @@ export class MQTTRouter {
     /**
      * Method for starting the MQTT handler
      */
-    start = () => {
+    start = (callback: Function) => {
         this._mqttClient.on('connect', () => {
             console.log('MQTT_Connecting...\n');
             this.setup();
@@ -153,6 +153,10 @@ export class MQTTRouter {
             }
             this._publishQueue.start();
             console.log(`MQTT_Router: Connected to the channel '${channel}'\n`);
+
+            if (callback) {
+                callback(`MQTT_Router: Connected to the channel ${channel}`);
+            }
         });
 
         this._mqttClient.on('error', (err) => {
