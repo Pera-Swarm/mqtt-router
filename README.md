@@ -1,28 +1,35 @@
-# mqtt-router [![npm (scoped)](https://img.shields.io/npm/v/@pera-swarm/mqtt-router.svg)](https://github.com/Pera-Swarm/mqtt-router/) [![GitHub Workflow Status](https://img.shields.io/github/workflow/status/Pera-Swarm/mqtt-router/%F0%9F%9A%80%20Release)](https://github.com/Pera-Swarm/mqtt-router/releases) [![GitHub issues](https://img.shields.io/github/issues/Pera-Swarm/mqtt-router)](https://github.com/Pera-Swarm/mqtt-router/issues)
+[![npm (scoped)](https://img.shields.io/npm/v/@pera-swarm/mqtt-router.svg)](https://github.com/Pera-Swarm/mqtt-router/) [![License: LGPL v3](https://img.shields.io/badge/License-LGPL_v2.1-blue.svg)](https://www.gnu.org/licenses/lgpl-2.1)
+# mqtt-router 
+
 An easy-to-use and flexible routing library for MQTT.
 
 ## Overview
 @pera-swarm/mqtt-router is a library for handling MQTT publish/subscribe capabilities with a straight forward routing architecture. 
+
 This is a [Node.js](https://nodejs.org/en/) library available on both npm registry and GitHub package registry.
 
 ### Usage
 
 #### 1. Installation 
 Installation done using `npm install` command:
-```
-$ npm i --save @pera-swarm/mqtt-router
+
+```bash
+npm i --save @pera-swarm/mqtt-router
 ```
 
 Also, you need to install [`mqtt`](https://www.npmjs.com/package/mqtt) library as well.
-```
-$ npm i --save mqtt
+
+```bash
+npm i --save mqtt
 ```
 
-#### 2. Set up routes
+#### 2. Set up Routes
+
 Create routes for subscribe and publish:
 
 ##### routes.js
-```
+
+```js
 // Sample dynamic route list with handler functions
 const SAMPLE_ROUTES = [
     {
@@ -40,10 +47,13 @@ const SAMPLE_ROUTES = [
 module.exports = SAMPLE_ROUTES;
 ```
 
-#### 3. Start the router
+#### 3. Start the Router
+
 You should configure your own mqttOptions according to your mqtt broker and application settings.
+
 ##### index.js
-```
+
+```js
 // Configure mqttClient
 const mqttClient = require('mqtt');
 const mqttOptions = {
@@ -91,8 +101,8 @@ specification and then if the subscriber picked up a message for the associated 
 You can also wrap the routes using `wrapper` function to include additional higher level attribute to the handler function as well.
 
 ##### index.js
-```
 
+```js
 // Import MQTTRouter and wrapper from mqtt-router
 const { MQTTRouter, wrapper } = require('@pera-swarm/mqtt-router');
 const routes = require('./routes');
@@ -130,7 +140,8 @@ router.start();
 ```
 
 ##### routes.js
-```
+
+```js
 // Sample dynamic route list with handler functions.
 // sampleAttrib will be added to the handler function as the second parameter.
 const SAMPLE_ROUTES = [
@@ -161,8 +172,9 @@ module.exports = SAMPLE_ROUTES;
 #### 1. Install dependencies
 
 Install project dependencies.
-```
-$ npm install
+
+```bash
+npm install
 ```
 
 #### 2. Testing
@@ -171,19 +183,21 @@ $ npm install
 and `MQTT_CLIENT`. Please refer `sample.nodemon.json` file for nodemon environment variable configuration.
 
 Manually run the test cases.
-```
-$ node test/index.js
+
+```bash
+node test/index.js
 ```
 
 or you can use nodemon script once environment variables configured correctly.
 
-```
-$ npm run client
+```bash
+npm run client
 ```
 
-<hr />
+<hr/>
 
 ## Documentation
+
 * <a href="#route"><code><b>Route</b></code></a>
 * <a href="#mqttrouter"><code><b>MQTTRouter</b></code></a>
   * <a href="#mqttrouter-start"><code>mqttRouter.<b>start()</b></code></a>
@@ -209,32 +223,25 @@ $ npm run client
 A route definition for handling route subscription logic. Following are the properties supported on the `Route` definition:
 
 - `topic: string`
-
   The Route topic
 
 - `type: 'String' | 'JSON'`
-
   Payload type (default:String)
   
 - `allowRetained: boolean`
-
   Retain allowance
   
 - `subscribe: boolean`
-
   Subscribe flag
 
 - `publish: boolean`
-
   Publish flag
 
 - `handler: Function`
-
   The default subscribe handler function, called when subscribe:true, packet.retain:true|false and allowRetained:true.
   Retained messages and new messages will be handled by default.
 
 - `fallbackRetainHandler?: Function`
-
   Subscribe handler function only for retained messages, but for route specific custom logic. called when subscribe:true, 
   packet.retain:true and allowRetained:false.
 > Note: If specified, `fallbackRetainHandler` function will be called. If not specified, retained messages will be discarded.
@@ -242,6 +249,7 @@ A route definition for handling route subscription logic. Following are the prop
 <hr />
 
 <a name="mqttrouter"></a>
+
 ### MQTTRouter (mqttConnection, routes, options, setup, onError)
 
 The main entrypoint of [mqtt-router](https://github.com/Pera-Swarm/mqtt-router/) that defines the router logic. 
@@ -256,6 +264,7 @@ Parameters supported in the constructor:
 <hr />
 
 <a name="mqttrouter-start"></a>
+
 ### mqttRouter.start()
 
 The method for starting the mqtt router. 
@@ -264,6 +273,7 @@ The method for starting the mqtt router.
 <hr />
 
 <a name="mqttrouter-pushToPublishQueue"></a>
+
 ### mqttRouter.pushToPublishQueue(topic, data)
 
 Add a message to the [publish queue](https://github.com/Pera-Swarm/mqtt-router/blob/master/README.md/#queue) that to be 
@@ -284,6 +294,7 @@ Parameter supported:
 <hr />
 
 <a name="mqttrouter-removeRoute"></a>
+
 ### mqttRouter.removeRoute(topic)
 
 Remove a route from the subscriber routes list.
@@ -293,6 +304,7 @@ Parameter supported:
 <hr />
 
 <a name="wrapper"></a>
+
 ### wrapper(routes, property)
 
 Wrap an array of `Route` objects with a higher order property (ex: property can be`this` from the callee class) or 
@@ -304,6 +316,7 @@ Parameters supported:
 <hr />
 
 <a name="queue"></a>
+
 ### Queue
 
 A Queue implementation for the `mqtt-router` with a scheduler that acts as a "Publish Queue".
@@ -315,6 +328,7 @@ Parameters supported in the constructor:
 <hr />
 
 <a name="queue-begin"></a>
+
 ### queue.begin()
 
 Begin the queue processing (scheduler).
@@ -393,7 +407,9 @@ Parameter supported:
 <hr />
 
 ### To-Do
-- [ ] Fix duplicate topic support for routing.
+
+- Fix duplicate topic support for routing.
 
 ### Licence
+
 This project is licensed under [LGPL-2.1 Licence](https://github.com/Pera-Swarm/mqtt-router/blob/main/LICENSE).
