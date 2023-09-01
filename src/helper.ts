@@ -1,13 +1,14 @@
 import { Route } from './router';
 import { channel } from './config';
+
 /**
- * function for wrapping a n array of objects
+ * Function for wrapping an array of objects
  * this will add a property to the handler function in each route object
  * @param {Route[]} routes
  * @param {any} property
  */
 export const wrapper = (routes: Route[], property: any) => {
-    let wrappedRoutes: Route[] = [];
+    const wrappedRoutes: Route[] = [];
 
     routes.map((item) => {
         wrappedRoutes.push({
@@ -20,13 +21,13 @@ export const wrapper = (routes: Route[], property: any) => {
 };
 
 /**
- * method for resolving mqtt topic channel
+ * Method for resolving MQTT topic channel
  * @param {string} topic messagae topic
  * @description merge the MQTT_CHANNEL environment variable with the given topic properly and returns it
  */
 export const resolveChannelTopic = (topic: string) => {
     const mergedTopic = channel + topic;
-    var result: string;
+    let result: string;
     if (typeof topic !== 'string') {
         console.error('Invalid topic');
         return channel;
@@ -48,7 +49,7 @@ export const resolveChannelTopic = (topic: string) => {
  * @param {number} frequency in seconds
  */
 export const secondsInterval = (freq: number) => {
-    return '*/' + freq + ' * * * * *';
+    return `*/${freq} * * * * *`;
 };
 
 /**
@@ -56,5 +57,5 @@ export const secondsInterval = (freq: number) => {
  * @param {number} frequency in minutes
  */
 export const minutesInterval = (freq: number) => {
-    return '*/' + freq + ' * * * *';
+    return `*/${freq} * * * *`;
 };

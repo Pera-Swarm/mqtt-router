@@ -1,8 +1,11 @@
-const { MQTTRouter } = require('../index');
+const MQTTRouter = require('../index');
 const mqttClient = require('mqtt');
 const mqttConfig = require('./mqtt.config');
 
-const mqttHost =  mqttConfig.HOST.startsWith("mqtt://") ? mqttConfig.HOST : `mqtt://${mqttConfig.HOST}` ;
+const mqttHost = mqttConfig.HOST?.startsWith('mqtt://')
+    ? mqttConfig.HOST
+    : `mqtt://${mqttConfig.HOST}`;
+
 const mqtt = mqttClient.connect(mqttHost, mqttConfig.mqttOptions);
 var router;
 
