@@ -19,13 +19,25 @@ jobs:
                 node-version: [16.x]
 
         timeout-minutes: 6
+        with:
+            MQTT_HOST: ${{ secrets.MQTT_HOST }}
+            PORT: ${{ secrets.MQTT_HOST }}
+
         steps:
             - uses: actions/checkout@v3
             - name: Use Node.js ${{ matrix.node-version }}
               uses: actions/setup-node@v3
               with:
                   node-version: ${{ matrix.node-version }}
+                  
+            - name: "Install dependencies"
+                run: npm ci
+            
+            - name: "Build"
+                run: npm run build --if-present
 
-            - run: npm ci
-            - run: npm run build --if-present
-            - run: npm run test
+            - name: "Test"
+                env:
+                    MQTT_HOST: ${{ secrets.MQTT_HOST }}
+                    PORT: ${{ secrets.MQTT_HOST }}
+                run: npm run test
