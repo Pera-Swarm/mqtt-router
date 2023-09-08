@@ -132,8 +132,8 @@ export class MQTTRouter {
         this.errorHandler = onError;
         this._unique = isUnique;
         this._id = uuidv4();
-        this._discoveryTopic = resolveChannelTopic(discoveryTopic);
-        this._terminateTopic = resolveChannelTopic(terminateTopic);
+        this._discoveryTopic = discoveryTopic;
+        this._terminateTopic = terminateTopic;
         this._created = new Date();
     }
 
